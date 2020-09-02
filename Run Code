@@ -1,0 +1,113 @@
+
+                    #  MACHINE LEARNING CLASSIFICATION Problem
+-------------------------------------------------------------------------------------------
+install.packages("glmnet")
+install.packages("C50")
+install.packages("gbm")
+#Load the required libraries
+library(MASS)
+library(datasets)
+library(ggplot2)
+library(lattice)
+library(corrplot)
+library(caret)
+library(glmnet)
+library(C50)
+library(randomForest)
+library(Matrix)
+library(gbm)
+#Load IRIS iris in R
+data("iris")
+# Checking the first 30 rows
+head(iris,n=30)
+#Summary of the iris
+summary(iris)
+#Checking the data type of different variables
+str(iris)
+#Creating Univariate plots to look at the aatributes of data
+boxplot(iris)
+#Checking data distribution using Histograms
+hist(iris$Sepal.Length)
+hist(iris$Sepal.Width)
+hist(iris$Petal.Length)
+hist(iris$Petal.Width)
+#Checking the co-relation between different attributes
+Correlation_Iris<- cor(iris[,-5])
+corrplot(Correlation_Iris, method = "circle")
+# Creating test harness
+control<- trainControl(method = "repeatedcv", number= 10, repeats = 3)
+# Defining the test metrics
+metric<- "Accuracy"
+#Building model
+preProcess=c("center","scale")
+#Algorithm spot check 
+-----------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------
+# Linear Discriminant Analysis
+set.seed(1)
+fit.lda <- train(Species ~., data=iris, method="lda", metric=metric, preProc=c("center", "scale"), trControl=control)
+# Logistic Regression
+set.seed(1)
+fit.glm <- train(Species~., data=iris, method="glm", metric=metric, trControl=control)
+# GLMNET
+set.seed(1)
+fit.glmnet <- train(Species~., data=iris, method="glmnet", metric=metric, preProc=c("center", "scale"), trControl=control)
+# SVM Radial
+set.seed(1)
+fit.svmRadial <- train(Species~., data=iris, method="svmRadial", metric=metric, preProc=c("center", "scale"), trControl=control, fit=FALSE)
+# kNN
+set.seed(1)
+fit.knn <- train(Species~., data=iris, method="knn", metric=metric, preProc=c("center", "scale"), trControl=control)
+# Naive Bayes
+set.seed(1)
+fit.nb <- train(Species~., data=iris, method="nb", metric=metric, trControl=control)
+# CART
+set.seed(1)
+fit.cart <- train(Species~., data=iris, method="rpart", metric=metric, trControl=control)
+# C5.0
+set.seed(1)
+fit.c50 <- train(Species~., data=iris, method="C5.0", metric=metric, trControl=control)
+# Bagged CART
+set.seed(1)
+fit.treebag <- train(Species~., data=iris, method="treebag", metric=metric, trControl=control)
+# Random Forest
+set.seed(1)
+fit.rf <- train(Species~., data=iris, method="rf", metric=metric, trControl=control)
+# Stochastic Gradient Boosting (Generalized Boosted Modeling)
+set.seed(1)
+fit.gbm <- train(Species~., data=iris, method="gbm", metric=metric, trControl=control, verbose=FALSE)
+------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------
+# Checking the model performance based on metrics
+results <- resamples(list(lda=fit.lda,glmnet=fit.glmnet,
+                svm=fit.svmRadial, knn=fit.knn, nb=fit.nb, cart=fit.cart, c50=fit.c50,
+                  bagging=fit.treebag, rf=fit.rf, gbm=fit.gbm))
+# Comparison Table
+summary(results)
+# Visualising the results for better comparison
+Spot_Check_Comp<- bwplot(results)
+Spot_Check_Comp
+Spot_Check_Comp2<- dotplot(results)
+Spot_Check_Comp2
+# LDA, GLMNET, KNN, RF algorithms were selected for further investigation based on the accuracy
+# LDA Model tuning for better results
+getModelInfo(fit.lda)
+control<- trainControl(method = "repeatedcv", number= 10, repeats = 3)
+set.seed(1)
+fit.lda <- train(Species ~., data=iris, method="lda", metric=metric, preProc=c("center", "scale"), trControl=control)
+confusionMatrix.train(fit.lda)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
